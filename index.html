@@ -1,0 +1,66 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload</title>
+</head>
+<body>
+  <h1>Upload Your File</h1>
+  <!-- Form for file upload -->
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="file" name="file" required />
+    <br><br>
+    <!-- Input field for custom code -->
+    <label for="customCode">Enter Custom Code:</label>
+    <input type="text" id="customCode" name="customCode" required />
+    <button type="submit">Upload</button>
+  </form>
+
+  <div id="uploadedFileLink" style="display:none;">
+    <h3>File uploaded successfully!</h3>
+    <p>Your custom code is: <span id="fileCode"></span></p>
+    <a id="fileLink" href="#" target="_blank">View File</a>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      const fileInput = document.getElementById('file');
+      const customCodeInput = document.getElementById('customCode');
+      formData.append('file', fileInput.files[0]);
+      formData.append('customCode', customCodeInput.value);  // Adding custom code to the request
+
+      try {
+        const response = await fetch('http://localhost:5000/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          const fileCode = data.code;  // Receive the custom code from the backend
+          const fileLink = document.getElementById('fileLink');
+          const fileCodeDisplay = document.getElementById('fileCode');
+
+          // Set the file link URL and the custom code display
+          fileLink.href = `http://localhost:5000/file/${fileCode}`;
+          fileCodeDisplay.textContent = fileCode;
+
+          // Show the file link
+          document.getElementById('uploadedFileLink').style.display = 'block';
+        } else {
+          alert('File upload failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error uploading file');
+      }
+    });
+  </script>
+</body>
+</html>
